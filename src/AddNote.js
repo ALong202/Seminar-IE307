@@ -48,15 +48,17 @@ const AddNote = ({ navigation }) => {
           open={isFabOpen}
           icon={isFabOpen ? 'close' : 'plus'}
           actions={[
-            { icon: 'eye', label: 'Circular Button', onPress: () => navigation.navigate('EditNote') }, //Expandable Circular Button
-            { icon: 'star', label: 'Swipe Button', onPress: () => navigation.navigate('SwipeButton') },//SwipeButton
-
-            //GiftCardCPN
+            { icon: 'eye', label: 'Circular Button', 
+              onPress: () => navigation.navigate('EditNote') 
+            }, 
+            { icon: 'star', label: 'Swipe Button', 
+              onPress: () => navigation.navigate('SwipeButton') 
+            },
           ]}
           onStateChange={({ open }) => setIsFabOpen(open)}
           onPress={() => {
             if (isFabOpen) {
-              // Xử lý logic khi FAB mở
+
             }
           }}
           style={styles.fabGroup}

@@ -1,10 +1,5 @@
-// React Native Swipeable Card View UI like Tinder
-// https://aboutreact.com/react-native-swipeable-cardview-like-tinder/
-
-// import React in our code
-import React, {useState} from 'react';
-
-// import all the components we are going to use
+// Import các thư viện React và React Native
+import React, { useState } from 'react';
 import {
   SafeAreaView,
   StyleSheet,
@@ -15,41 +10,48 @@ import {
   PanResponder,
 } from 'react-native';
 
+// Lấy chiều rộng màn hình để sử dụng làm ngưỡng vuốt
 const SCREEN_WIDTH = Dimensions.get('window').width;
 
-const SwipeableCard = ({item, removeCard, swipedDirection}) => {
-  // let xPosition = new Animated.Value(0);
+// Component SwipeableCard đại diện cho mỗi thẻ có thể vuốt được
+const SwipeableCard = ({ item, removeCard, swipedDirection }) => {
+  // xPosition: Giá trị động cho vị trí ngang (x) của thẻ, thay đổi khi người dùng kéo thẻ.
   const [xPosition, setXPosition] = useState(new Animated.Value(0));
-  let swipeDirection = '';
-  let cardOpacity = new Animated.Value(1);
+  let swipeDirection = ''; // Biến này dùng để lưu hướng vuốt (trái/phải)
+
+  let cardOpacity = new Animated.Value(1); // Quản lý độ mờ của thẻ, giảm dần khi thẻ được vuốt hoàn toàn khỏi màn hình
+
+  // Tạo hiệu ứng xoay thẻ khi vuốt từ trái qua phải hoặc ngược lại
   let rotateCard = xPosition.interpolate({
     inputRange: [-200, 0, 200],
     outputRange: ['-20deg', '0deg', '20deg'],
   });
 
+  // Tạo PanResponder để xử lý các cử chỉ vuốt
   let panResponder = PanResponder.create({
-    onStartShouldSetPanResponder:
-      (evt, gestureState) => false,
-    onMoveShouldSetPanResponder:
-      (evt, gestureState) => true,
-    onStartShouldSetPanResponderCapture: 
-      (evt, gestureState) => false,
-    onMoveShouldSetPanResponderCapture:
-      (evt, gestureState) => true,
-    onPanResponderMove:
-      (evt, gestureState) => {
-        xPosition.setValue(gestureState.dx);
-        if (gestureState.dx > SCREEN_WIDTH - 250) {
-          swipeDirection = 'Right';
-        } else if (gestureState.dx < -SCREEN_WIDTH + 250) {
-          swipeDirection = 'Left';
-        }
-      },
+    onStartShouldSetPanResponder: (evt, gestureState) => false, // Không bắt đầu PanResponder khi người dùng chạm
+    onMoveShouldSetPanResponder: (evt, gestureState) => true,  // Bắt đầu PanResponder khi người dùng di chuyển ngón tay
+    onStartShouldSetPanResponderCapture: (evt, gestureState) => false,
+    onMoveShouldSetPanResponderCapture: (evt, gestureState) => true,
+
+    // Cập nhật vị trí ngang (xPosition) khi người dùng kéo thẻ
+    onPanResponderMove: (evt, gestureState) => {
+      xPosition.setValue(gestureState.dx); // Thiết lập vị trí mới của xPosition dựa trên cử chỉ
+      // Kiểm tra hướng vuốt
+      if (gestureState.dx > SCREEN_WIDTH - 250) {
+        swipeDirection = 'Right';
+      } else if (gestureState.dx < -SCREEN_WIDTH + 250) {
+        swipeDirection = 'Left';
+      }
+    },
+
+    // Xử lý khi người dùng thả ngón tay
     onPanResponderRelease: (evt, gestureState) => {
       if (
         gestureState.dx < SCREEN_WIDTH - 150 &&
         gestureState.dx > -SCREEN_WIDTH + 150
       ) {
+        // Vuốt không đủ mạnh, đưa thẻ về vị trí cũ
         swipedDirection('--');
         Animated.spring(xPosition, {
           toValue: 0,
@@ -58,6 +60,7 @@ const SwipeableCard = ({item, removeCard, swipedDirection}) => {
           useNativeDriver: false,
         }).start();
       } else if (gestureState.dx > SCREEN_WIDTH - 150) {
+        // Vuốt đủ mạnh sang phải, đưa thẻ ra khỏi màn hình
         Animated.parallel([
           Animated.timing(xPosition, {
             toValue: SCREEN_WIDTH,
@@ -70,10 +73,11 @@ const SwipeableCard = ({item, removeCard, swipedDirection}) => {
             useNativeDriver: false,
           }),
         ]).start(() => {
-          swipedDirection(swipeDirection);
-          removeCard();
+          swipedDirection(swipeDirection); // Cập nhật hướng vuốt
+          removeCard(); // Xóa thẻ khỏi màn hình
         });
       } else if (gestureState.dx < -SCREEN_WIDTH + 150) {
+        // Vuốt đủ mạnh sang trái, đưa thẻ ra khỏi màn hình
         Animated.parallel([
           Animated.timing(xPosition, {
             toValue: -SCREEN_WIDTH,
@@ -86,22 +90,23 @@ const SwipeableCard = ({item, removeCard, swipedDirection}) => {
             useNativeDriver: false,
           }),
         ]).start(() => {
-          swipedDirection(swipeDirection);
-          removeCard();
+          swipedDirection(swipeDirection); // Cập nhật hướng vuốt
+          removeCard(); // Xóa thẻ khỏi màn hình
         });
       }
     },
   });
 
+  // Trả về phần tử Animated.View để hiển thị thẻ có thể vuốt được
   return (
     <Animated.View
       {...panResponder.panHandlers}
       style={[
         styles.cardStyle,
         {
-          backgroundColor: item.backgroundColor,
-          opacity: cardOpacity,
-          transform: [{translateX: xPosition}, {rotate: rotateCard}],
+          backgroundColor: item.backgroundColor, // Đặt màu nền cho thẻ từ dữ liệu item
+          opacity: cardOpacity, // Điều chỉnh độ mờ của thẻ
+          transform: [{ translateX: xPosition }, { rotate: rotateCard }], // Di chuyển và xoay thẻ dựa trên cử chỉ
         },
       ]}>
       <Text style={styles.cardTitleStyle}> {item.cardTitle} </Text>
@@ -109,32 +114,31 @@ const SwipeableCard = ({item, removeCard, swipedDirection}) => {
   );
 };
 
+// Component chính hiển thị các thẻ vuốt được
 const SwipeableCardCPN = () => {
-  const [noMoreCard, setNoMoreCard] = useState(false);
-  const [
-    sampleCardArray,
-    setSampleCardArray
-  ] = useState(DEMO_CONTENT);
-  const [swipeDirection, setSwipeDirection] = useState('--');
+  const [noMoreCard, setNoMoreCard] = useState(false); // Trạng thái để kiểm tra xem có còn thẻ không
+  const [sampleCardArray, setSampleCardArray] = useState(DEMO_CONTENT); // Mảng thẻ để hiển thị
+  const [swipeDirection, setSwipeDirection] = useState('--'); // Hướng vuốt cuối cùng
 
+  // Hàm xóa thẻ khỏi mảng khi được vuốt ra khỏi màn hình
   const removeCard = (id) => {
-    // alert(id);
     sampleCardArray.splice(
       sampleCardArray.findIndex((item) => item.id == id),
       1,
     );
-    setSampleCardArray(sampleCardArray);
+    setSampleCardArray([...sampleCardArray]); // Cập nhật lại mảng thẻ
     if (sampleCardArray.length == 0) {
-      setNoMoreCard(true);
+      setNoMoreCard(true); // Nếu hết thẻ, cập nhật trạng thái `noMoreCard`
     }
   };
 
+  // Hàm cập nhật hướng vuốt cuối cùng
   const lastSwipedDirection = (swipeDirection) => {
     setSwipeDirection(swipeDirection);
   };
 
   return (
-    <SafeAreaView style={{flex: 1}}>
+    <SafeAreaView style={{ flex: 1 }}>
       <Text style={styles.titleText}>
         React Native Swipeable Card View UI like Tinder
       </Text>
@@ -143,6 +147,7 @@ const SwipeableCardCPN = () => {
         {swipeDirection}
       </Text>
       <View style={styles.container}>
+        {/* Hiển thị từng thẻ từ `sampleCardArray` */}
         {sampleCardArray.map((item, key) => (
           <SwipeableCard
             key={key}
@@ -151,8 +156,9 @@ const SwipeableCardCPN = () => {
             swipedDirection={lastSwipedDirection}
           />
         ))}
+        {/* Hiển thị thông báo khi không còn thẻ nào */}
         {noMoreCard ? (
-          <Text style={{fontSize: 22, color: '#000'}}>
+          <Text style={{ fontSize: 22, color: '#000' }}>
             No Cards Found.
           </Text>
         ) : null}
@@ -163,6 +169,7 @@ const SwipeableCardCPN = () => {
 
 export default SwipeableCardCPN;
 
+// Định nghĩa các kiểu dáng cho thẻ và văn bản
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -193,6 +200,7 @@ const styles = StyleSheet.create({
   },
 });
 
+// Dữ liệu mẫu cho các thẻ
 const DEMO_CONTENT = [
   {
     id: '1',

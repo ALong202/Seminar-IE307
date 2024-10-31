@@ -60,11 +60,7 @@ const CardViewCPN = ({navigation}) => {
           actions={[
             { icon: 'eye', label: 'GiftCardCPN', onPress: () => navigation.navigate('GiftCardCPN') }, //SwipeButton
             { icon: 'star', label: 'SwipeableCardCPN', onPress: () => navigation.navigate('SwipeableCardCPN') },
-            // { icon: 'share', label: 'Share', onPress: () => navigation.navigate('ImageBackgroundCPN') }, //ImageBackgroundCPN
-            // { icon: 'share', label: 'CardViewCPN', onPress: () => navigation.navigate('CardViewCPN') },
-            // { icon: 'share', label: 'SwipeableCardCPN', onPress: () => navigation.navigate('SwipeableCardCPN') },//SwipeableCardCPN
-            // { icon: 'share', label: 'GiftCardCPN', onPress: () => navigation.navigate('GiftCardCPN') },
-            //GiftCardCPN
+
           ]}
           onStateChange={({ open }) => setIsFabOpen(open)}
           onPress={() => {
